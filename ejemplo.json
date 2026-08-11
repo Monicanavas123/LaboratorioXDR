@@ -1,0 +1,58 @@
+{
+  "Paquete 1 — Ejemplo": {
+    "Titulo_de_alerta": "Intentos de acceso fallidos masivos desde IP externa",
+    "Fase": "Initial Attempts",
+    "IP_atacante": "194.165.16.11",
+    "Host_objetivo": "WIN-LAPTOP-12 (10.10.12.45)",
+    "Usuario_interno": "mgarcia@empresa.local",
+    "Resumen": "Múltiples intentos de autenticación contra RDP/WinRM y servicios web internos desde la IP atacante durante un corto periodo; además DNS requests raros.",
+    "Evidencia": {
+      "Windows_Security": [
+        "2025-09-23T21:00:12Z - 4625 - Account: mgarcia - Source IP: 194.165.16.11 - Failure Reason: Unknown user name or bad password",
+        "2025-09-23T21:00:45Z - 4625 - Account: mgarcia - Source IP: 194.165.16.11 - Failure Reason: Account locked out"
+      ],
+      "VPN_Firewall": [
+        "2025-09-23T20:59:57Z - FW - DROP - src=194.165.16.11 dst=10.10.12.45 proto=TCP dport=3389"
+      ],
+      "Proxy_Web_Gateway": [
+        "2025-09-23T20:58:02Z - HTTP GET - host: auth.empresa.local/login - src: 194.165.16.11 - UA: python-requests/2.25"
+      ],
+      "DNS_logs": [
+        "2025-09-23T20:57:55Z - query: randomabc123.maldomain[.]top -> 194.165.16.11 (consulta sospechosa registrada por el resolver interno)"
+      ],
+      "Threat_Intel": "IP 194.165.16.11 aparece en listas de escaneo/portscan los últimos 30 días"
+    },
+    "Timeline": [
+      "20:57:55 — DNS query inusual desde la red",
+      "20:58:02 — HTTP probe al endpoint de login",
+      "20:59:57–21:02:00 — múltiples intentos RDP/WinRM contra WIN-LAPTOP-12",
+      "21:03:15 — bloqueo de cuenta por políticas de AD"
+    ],
+    
+    Analisis
+    Los eventos muestran reconocimiento y fuerza bruta/credential stuffing: múltiples fallos de login, probes HTTP automatizados y DNS dinámico. No hay pruebas de ejecución local todavía, por eso fase Initial Attempts.",
+    
+    Recomendaciones
+      
+        Bloquear 194.165.16.11 en el firewall y proxy
+        Forzar reset de contraseña de mgarcia
+        Deshabilitar sesiones activas del usuario si existen
+
+      Investigacion
+        Revisar otros hosts con fallos provenientes de la misma IP o patrones similares en otros equipos
+      
+      Recuperacion
+        Restablecer credenciales
+        Revisar y habilitar MFA en la cuenta de mgarcia
+
+
+    "IOCs": {
+      "IP": "194.165.16.11",
+      "DNS": "randomabc123.maldomain.top",
+      "UserAgent": "python-requests/2.25",
+      "Usuario_objetivo": "mgarcia@empresa.local"
+    }
+  }
+}
+
+
